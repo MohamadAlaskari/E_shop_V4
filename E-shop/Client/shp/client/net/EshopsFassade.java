@@ -1,7 +1,6 @@
 package shp.client.net;
 
 import java.io.BufferedReader;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -36,10 +35,10 @@ import shp.common.interfaces.E_ShopInterface;
 
 /**
  * Klasse mit Fassade der Bibliothek auf Client-Seite. Die Klasse stellt die von
- * der GUI erwarteten Methoden zur Verfügung und realisiert (transparent für die
- * GUI) die Kommunikation mit dem Server. Anmerkung: Auf dem Server wird dann
- * die eigentliche, von der lokalen Bibliotheksversion bekannte Funktionalität
- * implementiert (z.B. Bücher einfügen und suchen)
+ * der GUI erwarteten Methoden zur Verfügung und realisiert (transparent für
+ * die GUI) die Kommunikation mit dem Server. Anmerkung: Auf dem Server wird
+ * dann die eigentliche, von der lokalen Bibliotheksversion bekannte
+ * Funktionalität implementiert (z.B. Bücher einfügen und suchen)
  * 
  * 
  */
@@ -109,11 +108,8 @@ public class EshopsFassade implements E_ShopInterface {
 		try {
 			antwort = sin.readLine();
 			int anzahl = Integer.parseInt(antwort);
-
 			for (int i = 0; i < anzahl; i++) {
-				// Buch vom Server lesen ...
 				Artikel artikel = liesArtikelVonServer();
-				// ... und in Liste eintragen
 				liste.add(artikel);
 			}
 		} catch (Exception e) {
@@ -123,14 +119,7 @@ public class EshopsFassade implements E_ShopInterface {
 		return liste;
 	}
 
-	/**
-	 * Methode zum Suchen von Büchern anhand des Titels. Es wird eine Liste von
-	 * Büchern zurückgegeben, die alle Bücher mit exakt übereinstimmendem Titel
-	 * enthält.
-	 * 
-	 * @param titel Titel des gesuchten Buchs
-	 * @return Liste der gefundenen Bücher (evtl. leer)
-	 */
+
 
 	@Override
 	public Artikel sucheArtikelNachName(String name) throws ArtikelExistiertNichtException {
@@ -147,20 +136,7 @@ public class EshopsFassade implements E_ShopInterface {
 		return artikel;
 	}
 
-	/*
-	 * public List<Buch> sucheNachTitel(String titel) { List<Buch> liste = new
-	 * ArrayList<Buch>();
-	 * 
-	 * // Kennzeichen für gewählte Aktion senden sout.println("f"); // Parameter für
-	 * Aktion senden sout.println(titel);
-	 * 
-	 * // Antwort vom Server lesen und im info-Feld darstellen: String antwort =
-	 * "?"; try { // Anzahl gefundener Bücher einlesen antwort = sin.readLine(); int
-	 * anzahl = Integer.parseInt(antwort); for (int i=0; i<anzahl; i++) { // Buch
-	 * vom Server lesen ... Buch buch = liesBuchVonServer(); // ... und in Liste
-	 * eintragen liste.add(buch); } } catch (Exception e) {
-	 * System.err.println(e.getMessage()); return null; } return liste; }
-	 */
+	
 
 	private Artikel liesArtikelVonServer() throws IOException {
 		String antwort;
@@ -213,33 +189,53 @@ public class EshopsFassade implements E_ShopInterface {
 
 	}
 
-	/**
-	 * Methode zum Einfügen eines neuen Buchs in den Bestand. Wenn das Buch bereits
-	 * im Bestand ist, wird der Bestand nicht geändert.
-	 * 
-	 * @param titel  Titel des Buchs
-	 * @param nummer Nummer des Buchs
-	 * @returns Buch-Objekt, das im Erfolgsfall eingefügt wurde
-	 * @throws BuchExistiertBereitsException wenn das Buch bereits existiert
-	 */
+	@Override
+	public void gibArtikelnlisteAus(List<Artikel> artikelListe) {
+		sout.println("g");
+		sout.println(artikelListe.size());
+		sendeArtikelListAnServer(artikelListe);
+		String antwort = "?";
+		try {
+			antwort = sin.readLine();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+		System.out.println(antwort);
+
+	}
+	
+	private void sendeArtikelListAnServer(List<Artikel> artikeln) {
+		// Anzahl der gefundenen Bücher senden
+		sout.println(artikeln.size());
+		for (Artikel artikel : artikeln) {
+			sendeArtikelAnServer(artikel);
+		}
+	}
+	
+	private void sendeArtikelAnServer(Artikel artikel) {
+		sout.println(artikel.getArtikelId());
+		sout.println(artikel.getName());
+		sout.println(artikel.getBeschreibung());
+		sout.println(artikel.getBestand());
+		sout.println(artikel.getPreis());
+		sout.println(artikel.isVerfuegbar());
+		sout.println(artikel.getIstPackung());
+		if (artikel.getIstPackung()) {
+			Massengutartikel artikel_1 = (Massengutartikel) artikel;
+			sout.println(artikel_1.getPackungsGroesse());
+		}
+	}
+	
+	
 	@Override
 	public Artikel fuegeArtikelEin(Mitarbeiter mitarbeiter, String name, String beschreibung, int bestand, double preis,
 			boolean istPackung) throws AnzahlIsNichtDefiniertException, ArtikelExistiertBereitsException,
 			BestandPasstNichtMitPackungsGroesseException, ArtikelExistiertNichtException {
-		// TODO Auto-generated method stub
 		sout.println("e");
 
-		sout.println(mitarbeiter.getMaId());
-		sout.println(mitarbeiter.getName());
-		sout.println(mitarbeiter.getNutzerName());
-		sout.println(mitarbeiter.getPasswort());
-		sout.println(mitarbeiter.getVorname());
+		sendMitarbeiterAnServer(mitarbeiter);
 
-		sout.println(name);
-		sout.println(beschreibung);
-		sout.println(bestand);
-		sout.println(preis);
-		sout.println(istPackung);
+		sendArtikelAnServer(name, beschreibung, bestand, preis, istPackung);
 
 		String antwort = "Fehler";
 		try {
@@ -261,20 +257,157 @@ public class EshopsFassade implements E_ShopInterface {
 		}
 
 	}
+	
+	@Override
+	public Artikel fuegeMassenArtikelEin(Mitarbeiter mitarbeiter, String name, String beschreibung, int bestand,
+			double preis, boolean istPackung, int packungsGroesse)
+			throws AnzahlIsNichtDefiniertException, ArtikelExistiertBereitsException,
+			BestandPasstNichtMitPackungsGroesseException, ArtikelExistiertNichtException {
+		sout.println("t");
+		sendMitarbeiterAnServer(mitarbeiter);
+		sendMassengutArtikelAnServer(name, beschreibung, bestand, preis, istPackung, packungsGroesse);
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				// Eingefügtes Buch vom Server lesen ...
+				Artikel artikel = liesArtikelVonServer();
 
-	/*
-	 * public Buch fuegeBuchEin(String titel, int nummer) throws
-	 * BuchExistiertBereitsException { // Kennzeichen für gewählte Aktion senden
-	 * sout.println("e"); // Parameter für Aktion senden sout.println(nummer);
-	 * sout.println(titel);
-	 * 
-	 * // Antwort vom Server lesen: String antwort = "Fehler"; try { antwort =
-	 * sin.readLine(); if (antwort.equals("Erfolg")) { // Eingefügtes Buch vom
-	 * Server lesen ... Buch buch = liesArtikelVonServer(); // ... und zurückgeben
-	 * return buch; } else { // Fehler: Exception (re-)konstruieren String message =
-	 * sin.readLine(); throw new BuchExistiertBereitsException(message); } } catch
-	 * (IOException e) { System.err.println(e.getMessage()); return null; } }
-	 */
+				// ... und zurückgeben
+				return artikel;
+			} else {
+				// Fehler: Exception (re-)konstruieren
+				String message = sin.readLine();
+				throw new ArtikelExistiertBereitsException(message);
+			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			return null;
+		}
+	}
+
+
+	
+
+	@Override
+	public Artikel loescheArtikel(Mitarbeiter mitarbeiter, String name) throws ArtikelExistiertNichtException {
+		sout.println("d");
+		sendMitarbeiterAnServer(mitarbeiter);
+		sout.println(name);
+		String antwort="?";
+		try {
+			antwort = sin.readLine();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+		Artikel artikel = sucheArtikelNachName(name);
+		System.out.println(antwort);
+		return artikel;
+	}
+	
+	
+	@Override
+	public Artikel erhoeheArtikelBestand(Mitarbeiter mitarbeiter, String name, int anzahl)
+			throws ArtikelExistiertNichtException, BestandPasstNichtMitPackungsGroesseException {
+		sout.println("h");
+		sendMitarbeiterAnServer(mitarbeiter);
+		sout.println(name);
+		sout.println(anzahl);
+		String antwort="?";
+		try {
+			antwort = sin.readLine();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+		System.out.println(antwort);
+		Artikel artikel = sucheArtikelNachName(name);
+		return artikel;
+	}
+	
+	
+	@Override
+	public Artikel senkenArtikelBestand(Mitarbeiter mitarbeiter, String name, int anzahl)
+			throws ArtikelExistiertNichtException, BestandPasstNichtMitPackungsGroesseException,
+			SenkenUnterNullNichtMoeglichException {
+		
+		sout.println("h");
+		sendMitarbeiterAnServer(mitarbeiter);
+		sout.println(name);
+		sout.println(anzahl);
+		String antwort="?";
+		try {
+			antwort = sin.readLine();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+		System.out.println(antwort);
+		Artikel artikel = sucheArtikelNachName(name);
+		return artikel;
+	}
+	
+	
+	@Override
+	public boolean checkMassengutatikel(Artikel artikel) throws ArtikelExistiertNichtException {
+		boolean status = false;
+		sout.println("j");
+		sendArtikelAnServer(artikel.getName(), artikel.getBeschreibung(), artikel.getBestand(), artikel.getPreis(), artikel.getIstPackung());
+		String antwort="?";
+		try {
+			antwort = sin.readLine();
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
+		status = Boolean.parseBoolean(antwort);
+		System.out.println(antwort);
+		return status;
+	}
+	
+	@Override
+	public Massengutartikel artikelZuMassengeutartikel(Artikel artikel) throws ArtikelExistiertNichtException {
+		sout.println("n");
+		sendArtikelAnServer(artikel.getName(), artikel.getBeschreibung(), artikel.getBestand(), artikel.getPreis(), artikel.getIstPackung());
+		Massengutartikel artikel_1= null;
+		try {
+			artikel_1 = (Massengutartikel) liesArtikelVonServer();
+			
+		} catch (IOException e) {
+			e.getMessage();
+		}
+		return artikel_1;
+	}
+	
+
+
+	@Override
+	public void schreibeArtikel() throws IOException {
+		sout.println("x");
+
+	}
+	
+	private void sendArtikelAnServer(String name, String beschreibung, int bestand, double preis, boolean istPackung) {
+		sout.println(name);
+		sout.println(beschreibung);
+		sout.println(bestand);
+		sout.println(preis);
+		sout.println(istPackung);
+	}
+	private void sendMassengutArtikelAnServer(String name, String beschreibung, int bestand, double preis, boolean istPackung, int packungsGroesse) {
+		sout.println(name);
+		sout.println(beschreibung);
+		sout.println(bestand);
+		sout.println(preis);
+		sout.println(istPackung);
+		sout.println(packungsGroesse);
+	}
+
+	private void sendMitarbeiterAnServer(Mitarbeiter mitarbeiter) {
+		sout.println(mitarbeiter.getMaId());
+		sout.println(mitarbeiter.getName());
+		sout.println(mitarbeiter.getNutzerName());
+		sout.println(mitarbeiter.getPasswort());
+		sout.println(mitarbeiter.getVorname());
+	}
+	
 
 	// Kunde
 
@@ -329,32 +462,6 @@ public class EshopsFassade implements E_ShopInterface {
 	}
 
 	/**
-	 * Methode zum Löschen eines Buchs aus dem Bestand. Es wird nur das erste
-	 * Vorkommen des Buchs gelöscht.
-	 * 
-	 * @param titel  Titel des Buchs
-	 * @param nummer Nummer des Buchs
-	 */
-
-	public void loescheBuch(String titel, int nummer) {
-		// Kennzeichen für gewählte Aktion senden
-		sout.println("d");
-		// Parameter für Aktion senden
-		sout.println(nummer);
-		sout.println(titel);
-
-		// Antwort vom Server lesen:
-		String antwort;
-		try {
-			antwort = sin.readLine();
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			return;
-		}
-		System.out.println(antwort);
-	}
-
-	/**
 	 * Methode zum Speichern des Buchbestands in einer Datei.
 	 * 
 	 * @throws IOException
@@ -392,44 +499,16 @@ public class EshopsFassade implements E_ShopInterface {
 		System.out.println(antwort);
 	}
 
-	@Override
-	public Artikel erhoeheArtikelBestand(Mitarbeiter mitarbeiter, String name, int anzahl)
-			throws ArtikelExistiertNichtException, BestandPasstNichtMitPackungsGroesseException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public Artikel senkenArtikelBestand(Mitarbeiter mitarbeiter, String name, int anzahl)
-			throws ArtikelExistiertNichtException, BestandPasstNichtMitPackungsGroesseException,
-			SenkenUnterNullNichtMoeglichException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
-	@Override
-	public void gibArtikelnlisteAus(List<Artikel> artikelListe) {
-		// TODO Auto-generated method stub
+	
 
-	}
 
-	@Override
-	public boolean checkMassengutatikel(Artikel artikel) throws ArtikelExistiertNichtException {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	
 
-	@Override
-	public Massengutartikel artikelZuMassengeutartikel(Artikel artikel) throws ArtikelExistiertNichtException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
-	@Override
-	public void schreibeArtikel() throws IOException {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 	@Override
 	public Kunde sucheKunde(String nutzerName) {
@@ -596,20 +675,6 @@ public class EshopsFassade implements E_ShopInterface {
 		return null;
 	}
 
-	@Override
-	public Artikel fuegeMassenArtikelEin(Mitarbeiter mitarbeiter, String name, String beschreibung, int bestand,
-			double preis, boolean istPackung, int packungsGroesse)
-			throws AnzahlIsNichtDefiniertException, ArtikelExistiertBereitsException,
-			BestandPasstNichtMitPackungsGroesseException, ArtikelExistiertNichtException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Artikel loescheArtikel(Mitarbeiter mitarbeiter, String name) throws ArtikelExistiertNichtException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	// TODO: Weitere Funktionen der Bibliotheksverwaltung, z.B. ausleihen,
 	// zurückgeben etc.
