@@ -318,11 +318,12 @@ public class MitarbeiterMenuePanel extends JPanel {
 	}
 
 	protected void do_btn_MA_regestrieren_actionPerformed(ActionEvent e) {
-		try {
-			shop.regestiereNeueMitarbeiter(TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY, TOOL_TIP_TEXT_KEY);
-		} catch (MitarbeiterUsernameIstBenutztException e1) {
-			// todo excption
-			
-		}
+		MARegestrierenDialog regDialog = new MARegestrierenDialog(shop);
+
+		// Setze das Dialogfenster als modal, um zu verhindern, dass Benutzer auf das
+		// Hauptfenster zugreifen können, während der Dialog geöffnet ist
+		regDialog.setModal(true);
+
+		regDialog.setVisible(true);
 	}
 }
