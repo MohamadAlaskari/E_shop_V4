@@ -201,7 +201,7 @@ public class E_shop_CUI {
 			artikelName = liesEingabe();
 
 			try {
-				gesuchteArtikel = sh.loescheArtikel(loggedMitarbeiter, artikelName);
+				sh.loescheArtikel(loggedMitarbeiter, artikelName);
 				System.out.println("\nL�schen ok\n");
 			} catch (ArtikelExistiertNichtException e) {
 				System.err.println("\n" + e.getMessage() + "\n");
