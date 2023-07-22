@@ -292,7 +292,6 @@ class ClientRequestProcessor implements Runnable {
 	}
 
 	private void sendeMitArbeiter_List_AnClient() {
-// Anzahl der gefundenen BÃ¼cher senden
 		try {
 			List<Mitarbeiter> mitarbeiter_List = shop.gibAlleMitarbeiter();
 			out.println("Erfolg");
