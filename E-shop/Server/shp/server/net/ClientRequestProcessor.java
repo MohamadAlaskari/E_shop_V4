@@ -122,7 +122,9 @@ class ClientRequestProcessor implements Runnable {
 				gibArtikelnlisteAus();
 			} else if (input.equals("x")) {
 				schreibeArtikel();
-			}else if (input.equals("maeinloggen")) {
+			}
+			/////////////////////Mitarbeiter/////////////////////////
+			else if (input.equals("maeinloggen")) {
                 mitarbeiterEinlogen();
             } else if (input.equals("masuchen")) {
                 mitarbeiterSuchen();
@@ -135,6 +137,8 @@ class ClientRequestProcessor implements Runnable {
             } else if (input.equals("gibAlleMitarbeiter")) {
                 sendeMitArbeiter_List_AnClient();
             }
+			/////////////////////Ende Mitarbeiter/////////////////////////
+
 			else if (input.equals("s")) {
 				// Aktion "_s_peichern" gewählt
 				speichern();
