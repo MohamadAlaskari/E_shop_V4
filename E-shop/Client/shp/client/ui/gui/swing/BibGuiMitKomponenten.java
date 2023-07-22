@@ -14,7 +14,6 @@ import shp.client.ui.swing.panels.Login_Panel;
 import shp.client.ui.swing.panels.LogoutPanel;
 import shp.client.ui.swing.panels.MitarbeiterMenuePanel;
 import shp.client.ui.swing.panels.SearchArtikelsPanel;
-import shp.client.ui.swing.panels.VerlaufPanel;
 import shp.client.ui.swing.panels.KundenMenuePanel.OnWarenkorpListener;
 import shp.common.entities.Artikel;
 import shp.common.entities.Kunde;
@@ -62,7 +61,6 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 	JScrollPane scrollPane;
 	private HashMap<Artikel, Integer> warenkorb;
 	private List<Verlauf> verlaufListe;
-	private VerlaufPanel verlaufPanel;
 	private VerlaufTableModel verTableModel;
 	public static final int DEFAULT_PORT = 6789;
 
