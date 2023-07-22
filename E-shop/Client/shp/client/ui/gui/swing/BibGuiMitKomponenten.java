@@ -332,9 +332,11 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 
 	@Override
 	public void onSearchResult(java.util.List<Artikel> artikeln) {
-
+		artikelTableModel = new ArtikelTableModel(artikeln);
 		artikelnTablePanel.setModel(artikelTableModel);
 		artikelnTablePanel.updateArtikelnList(artikeln);
+		scrollPane.setBorder(BorderFactory.createTitledBorder("Artikeln"));
+
 	}
 	@Override
 	public void updateTable() {
