@@ -17,6 +17,7 @@ import shp.common.exceptions.AnzahlIsNichtDefiniertException;
 import shp.common.exceptions.ArtikelExistiertBereitsException;
 import shp.common.exceptions.ArtikelExistiertNichtException;
 import shp.common.exceptions.BestandPasstNichtMitPackungsGroesseException;
+import shp.common.exceptions.MitarbeiterUsernameIstBenutztException;
 import shp.common.exceptions.NutzernameOderPasswortFalschException;
 import shp.common.exceptions.SenkenUnterNullNichtMoeglichException;
 import shp.common.interfaces.E_ShopInterface;
@@ -24,13 +25,13 @@ import shp.common.interfaces.E_ShopInterface;
 /**
  * Klasse zur Verarbeitung der Kommunikation zwischen EINEM Client und dem
  * Server. Die Kommunikation folgt dabei dem "Protokoll" der Anwendung. Das
- * ClientRequestProcessor-Objekt führt folgende Schritte aus: 0.
- * Begrüßungszeile an den Client senden Danach in einer Schleife: 1. Empfang
- * einer Zeile vom Client (z.B. Aktionsauswahl, hier eingeschränkt); wenn der
- * Client die Abbruchaktion sendet ('q'), wird die Schleife verlassen 2.
- * abhängig von ausgewählter Aktion Empfang weiterer Zeilen (Parameter für
- * ausgewählte Aktion) 3. Senden der Antwort an den Client; die Antwort besteht
- * je nach Aktion aus einer oder mehr Zeilen
+ * ClientRequestProcessor-Objekt führt folgende Schritte aus: 0. Begrüßungszeile
+ * an den Client senden Danach in einer Schleife: 1. Empfang einer Zeile vom
+ * Client (z.B. Aktionsauswahl, hier eingeschränkt); wenn der Client die
+ * Abbruchaktion sendet ('q'), wird die Schleife verlassen 2. abhängig von
+ * ausgewählter Aktion Empfang weiterer Zeilen (Parameter für ausgewählte
+ * Aktion) 3. Senden der Antwort an den Client; die Antwort besteht je nach
+ * Aktion aus einer oder mehr Zeilen
  * 
  * @author teschke, eirund
  */
@@ -71,8 +72,8 @@ class ClientRequestProcessor implements Runnable {
 	}
 
 	/**
-	 * Methode zur Abwicklung der Kommunikation mit dem Client gemäß dem
-	 * vorgebenen Kommunikationsprotokoll.
+	 * Methode zur Abwicklung der Kommunikation mit dem Client gemäß dem vorgebenen
+	 * Kommunikationsprotokoll.
 	 */
 	public void run() {
 
@@ -119,13 +120,21 @@ class ClientRequestProcessor implements Runnable {
 				fuegeArtikelEin();
 			} else if (input.equals("g")) {
 				gibArtikelnlisteAus();
-			}else if (input.equals("x")) {
+			} else if (input.equals("x")) {
 				schreibeArtikel();
-			}
-//				else if (input.equals("f")) {
-//				// Aktion "Bücher _f_inden" (suchen) gewählt
-//				suchen();
-//			}
+			}else if (input.equals("maeinloggen")) {
+                mitarbeiterEinlogen();
+            } else if (input.equals("masuchen")) {
+                mitarbeiterSuchen();
+            } else if (input.equals("maregestrieren")) {
+                mitarbeiterRegistrieren();
+            } else if (input.equals("malogout")) {
+                mitarbeiterLogout();
+            } else if (input.equals("mashreiben")) {
+                mitarbeiterSchreiben();
+            } else if (input.equals("gibAlleMitarbeiter")) {
+                sendeMitArbeiter_List_AnClient();
+            }
 			else if (input.equals("s")) {
 				// Aktion "_s_peichern" gewählt
 				speichern();
@@ -139,6 +148,164 @@ class ClientRequestProcessor implements Runnable {
 		// Verbindung wurde vom Client abgebrochen:
 		disconnect();
 	}
+
+/////////////////////////Mitarbeiter ///////////////////////////
+	private Mitarbeiter mitarbeiterEinlogen() {
+		Mitarbeiter mitarbeiter = null;
+		String input = "";
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (Nutzername M): ");
+			System.out.println(e.getMessage());
+		}
+		String nutzername = input;
+
+		try {
+			input = in.readLine();
+
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (Password M): ");
+			System.out.println(e.getMessage());
+		}
+		String password = input;
+		try {
+			mitarbeiter = shop.mitarbeiterEinloggen(nutzername, password);
+			out.println("Erfolg");
+			sendeMitarbeiterAnClient(mitarbeiter);
+
+		} catch (NutzernameOderPasswortFalschException e) {
+			System.out.println(e.getMessage());
+			out.println("Fehler");
+
+		}
+		return mitarbeiter;
+	}
+
+	private Mitarbeiter mitarbeiterSuchen() {
+		Mitarbeiter mitarbeiter = null;
+		String input = "";
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (Nutzername mitarbeiterSuchen): ");
+			System.out.println(e.getMessage());
+		}
+		String nutzername = input;
+
+		try {
+			mitarbeiter = shop.sucheMitarbeiter(nutzername);
+			out.println("Erfolg");
+			sendeMitarbeiterAnClient(mitarbeiter);
+
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+// wir haben noch keine exception
+			System.out.println("mitarbeiter mit '" + nutzername + "' nicht gefunden");
+			out.println("Fehler");
+
+		}
+		return mitarbeiter;
+	}
+
+	private void mitarbeiterRegistrieren() {
+		Mitarbeiter mitarbeiter = lies_mitarbeiter();
+
+		try {
+			shop.regestiereNeueMitarbeiter(mitarbeiter.getName(), mitarbeiter.getVorname(), mitarbeiter.getNutzerName(),
+					mitarbeiter.getPasswort());
+			out.println("Erfolg");
+		} catch (MitarbeiterUsernameIstBenutztException e) {
+// TODO Auto-generated catch block
+			e.printStackTrace();
+			out.println("Fehler");
+		}
+
+	}
+
+	private void sendeMitarbeiterAnClient(Mitarbeiter mitarbeiter) {
+		out.println(mitarbeiter.getMaId());
+		out.println(mitarbeiter.getName());
+		out.println(mitarbeiter.getVorname());
+		out.println(mitarbeiter.getNutzerName());
+		out.println(mitarbeiter.getPasswort());
+	}
+
+	private void mitarbeiterLogout() {
+		Mitarbeiter mitarbeiter = lies_mitarbeiter();
+
+		try {
+			shop.loggeMitarbeiterAus(mitarbeiter);
+			out.println("Erfolg");
+
+		} catch (Exception e) {
+			out.println("Fehler");
+		}
+
+	}
+
+	private Mitarbeiter lies_mitarbeiter() {
+		Mitarbeiter mitarbeiter;
+		String input = "";
+
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (Name mitarbeiterRegistrieren): ");
+			System.out.println(e.getMessage());
+		}
+		String name = input;
+
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (vorName mitarbeiterRegistrieren): ");
+			System.out.println(e.getMessage());
+		}
+		String vorName = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (nutzerName mitarbeiterRegistrieren): ");
+			System.out.println(e.getMessage());
+		}
+		String nutzerName = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (password mitarbeiterRegistrieren): ");
+			System.out.println(e.getMessage());
+		}
+		String password = input;
+
+		mitarbeiter = new Mitarbeiter(name, vorName, nutzerName, password);
+		return mitarbeiter;
+	}
+
+	private void mitarbeiterSchreiben() {
+		try {
+			shop.schreibeMitarbeiter();
+		} catch (IOException e) {
+			e.getMessage();
+
+		}
+	}
+
+	private void sendeMitArbeiter_List_AnClient() {
+// Anzahl der gefundenen BÃ¼cher senden
+		try {
+			List<Mitarbeiter> mitarbeiter_List = shop.gibAlleMitarbeiter();
+			out.println("Erfolg");
+			out.println(mitarbeiter_List.size());
+			for (Mitarbeiter mitarbeiter : mitarbeiter_List) {
+				sendeMitarbeiterAnClient(mitarbeiter);
+			}
+		} catch (Exception e) {
+			out.println("Fehler");
+		}
+
+	}
+//////////////////////////Ende Mitarbeiter/////////////////////////////
 
 	private void ausgeben() {
 		// Die Arbeit soll wieder das Bibliotheksverwaltungsobjekt machen:
@@ -165,7 +332,7 @@ class ClientRequestProcessor implements Runnable {
 			System.out.println("--->Fehler beim Lesen vom Client (ListeSize): ");
 			System.out.println(e.getMessage());
 		}
-		
+
 		int anzahl = Integer.parseInt(input);
 		for (int i = 0; i < anzahl; i++) {
 			Artikel artikel = getArtikelVonClient();
@@ -364,7 +531,7 @@ class ClientRequestProcessor implements Runnable {
 		}
 		out.println("Erfolg");
 	}
-	
+
 	public void schreibeArtikel() {
 		try {
 			shop.schreibeArtikel();
