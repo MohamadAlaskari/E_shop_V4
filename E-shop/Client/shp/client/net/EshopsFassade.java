@@ -173,21 +173,6 @@ public class EshopsFassade implements E_ShopInterface {
 		return artikel;
 	}
 
-	private Mitarbeiter liesMitarbeiterVonServer() throws IOException {
-		String antwort;
-		Mitarbeiter mitarbeiter = null;
-
-		antwort = sin.readLine();
-		int id = Integer.parseInt(antwort);
-		String Name = sin.readLine();
-		String vorname = sin.readLine();
-		String nutzerName = sin.readLine();
-		String password = sin.readLine();
-
-		mitarbeiter = new Mitarbeiter(id, Name, vorname, nutzerName, password);
-		return mitarbeiter;
-
-	}
 
 	@Override
 	public void gibArtikelnlisteAus(List<Artikel> artikelListe) {
@@ -546,57 +531,193 @@ public class EshopsFassade implements E_ShopInterface {
 		// TODO Auto-generated method stub
 
 	}
+//////////////////////////Mitarbeiter //////////////////////////////////
+@Override
+public Mitarbeiter sucheMitarbeiter(String nutzerName) {
+sout.println("masuchen");
+sout.println(nutzerName);
 
-	@Override
-	public Mitarbeiter sucheMitarbeiter(String nutzerName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+String antwort = "Fehler";
+try {
+antwort = sin.readLine();
+if (antwort.equals("Erfolg")) {
 
-	@Override
-	public List<String> mitarbeiterMenue() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+Mitarbeiter mitarbeiter = liesMitarbeiterVonServer();
+return mitarbeiter;
 
-	@Override
-	public void mitarbeiterEinfuegen(String name, String vorName, String nutzerName, String passwort)
-			throws MitarbeiterUsernameIstBenutztException {
-		// TODO Auto-generated method stub
+} else {
+// Fehler: Exception (re-)konstruieren
+String message = sin.readLine();
+System.out.println(message);
+}
+} catch (IOException e) {
+System.err.println(e.getMessage());
+}
+return null;
+}
 
-	}
+@Override
+public List<String> mitarbeiterMenue() {
+// TODO Auto-generated method stub
+return null;
+}
 
-	@Override
-	public Mitarbeiter mitarbeiterEinloggen(String nutzerName, String passwort)
-			throws NutzernameOderPasswortFalschException {
-		// TODO Auto-generated method stub
-		return null;
-	}
+@Override
+public void mitarbeiterEinfuegen(String name, String vorName, String nutzerName, String passwort)
+throws MitarbeiterUsernameIstBenutztException {
+/*
+* Mitarbeiter mitarbeiter = null; sout.println("ma_einfuegen");
+* sout.println(name); sout.println(vorName); sout.println(nutzerName);
+* sout.println(passwort);
+* 
+* String antwort = "Fehler"; try { antwort = sin.readLine(); if
+* (antwort.equals("Erfolg")) {
+* 
+* // Eingelogte MA vom Server lesen ...
+* 
+* // TODO Auto-generated method stub
+* 
+* // ... und zurÃ¼ckgeben
+* 
+* if (ma.getNutzerName().equals(mitarbeiter.getNutzerName()) || ma.getMaId() ==
+* mitarbeiter.getMaId()) { throw new
+* MitarbeiterUsernameIstBenutztException(mitarbeiter, ""); }
+* 
+* } else { // Fehler: Exception (re-)konstruieren String message =
+* sin.readLine(); } } catch (IOException e) {
+* System.err.println(e.getMessage()); }
+*/
+}
 
-	@Override
-	public void regestiereNeueMitarbeiter(String name, String vorName, String nutzerName, String passwort)
-			throws MitarbeiterUsernameIstBenutztException {
-		// TODO Auto-generated method stub
+@Override
+public Mitarbeiter mitarbeiterEinloggen(String nutzerName, String passwort)
+throws NutzernameOderPasswortFalschException {
 
-	}
+sout.println("maeinloggen");
+sout.println(nutzerName);
+sout.println(passwort);
 
-	@Override
-	public void loggeMitarbeiterAus(Mitarbeiter mitarbeiter) {
-		// TODO Auto-generated method stub
+String antwort = "Fehler";
+try {
+antwort = sin.readLine();
+if (antwort.equals("Erfolg")) {
+// Eingelogte MA vom Server lesen ...
+Mitarbeiter mitarbeiter = liesMitarbeiterVonServer();
+return mitarbeiter;
+} else {
+// Fehler: Exception (re-)konstruieren
+String message = sin.readLine();
+throw new NutzernameOderPasswortFalschException();
+}
+} catch (IOException e) {
+System.err.println(e.getMessage());
+return null;
+}
+}
 
-	}
+@Override
+public void regestiereNeueMitarbeiter(String name, String vorName, String nutzerName, String passwort)
+throws MitarbeiterUsernameIstBenutztException {
 
-	@Override
-	public List<Mitarbeiter> gibAlleMitarbeiter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+Mitarbeiter mitarbeiter = null;
+sout.println("maregestrieren");
+sout.println(name);
+sout.println(vorName);
+sout.println(nutzerName);
+sout.println(passwort);
 
-	@Override
-	public void schreibeMitarbeiter() throws IOException {
-		// TODO Auto-generated method stub
+String antwort = "Fehler";
+try {
+antwort = sin.readLine();
+if (antwort.equals("Erfolg")) { // Eingelogte MA vom Server lesen ...
 
-	}
+// TODO Auto-generated method stub
+
+} else { // Fehler: Exception (re-)konstruieren String message =
+sin.readLine();
+
+throw new MitarbeiterUsernameIstBenutztException(mitarbeiter, "");
+}
+} catch (IOException e) {
+System.err.println(e.getMessage());
+}
+
+}
+
+@Override
+public void loggeMitarbeiterAus(Mitarbeiter mitarbeiter) {
+sout.println("malogout");
+sout.println(mitarbeiter.getName());
+sout.println(mitarbeiter.getVorname());
+sout.println(mitarbeiter.getNutzerName());
+sout.println(mitarbeiter.getPasswort());
+
+String antwort = "Fehler";
+try {
+antwort = sin.readLine();
+if (antwort.equals("Erfolg")) { // Eingelogte MA vom Server lesen ...
+
+// TODO Auto-generated method stub
+
+} else { // Fehler: Exception (re-)konstruieren String message =
+sin.readLine();
+
+}
+} catch (IOException e) {
+System.err.println(e.getMessage());
+}
+}
+
+@Override
+public List<Mitarbeiter> gibAlleMitarbeiter() {
+List<Mitarbeiter> mitarbeiter_list = new Vector<Mitarbeiter>();
+sout.println("gibAlleMitarbeiter");
+String antwort = "Fehler";
+try {
+antwort = sin.readLine();
+if (antwort.equals("Erfolg")) {
+antwort = sin.readLine();
+int anzahl = Integer.parseInt(antwort);
+for (int i = 0; i < anzahl; i++) {
+Mitarbeiter ma = liesMitarbeiterVonServer();
+mitarbeiter_list.add(ma);
+}
+return mitarbeiter_list;
+} else {
+// Fehler: Exception (re-)konstruieren
+String message = sin.readLine();
+System.out.println(message);
+
+}
+} catch (IOException e) {
+System.err.println(e.getMessage());
+return null;
+}
+
+return null;
+}
+
+@Override
+public void schreibeMitarbeiter() throws IOException {
+sout.println("mashreiben");
+}
+
+private Mitarbeiter liesMitarbeiterVonServer() throws IOException {
+String antwort;
+Mitarbeiter mitarbeiter = null;
+
+antwort = sin.readLine();
+int id = Integer.parseInt(antwort);
+String Name = sin.readLine();
+String vorname = sin.readLine();
+String nutzerName = sin.readLine();
+String password = sin.readLine();
+
+mitarbeiter = new Mitarbeiter(id, Name, vorname, nutzerName, password);
+return mitarbeiter;
+}
+
+/////////////////////Ende Mitarbeiter /////////////////////////////////
 
 	@Override
 	public Rechnung erstelleRechnung(Bestellung bestl) {
