@@ -212,8 +212,7 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 		this.setVisible(true);
 	}
 
-	
-	
+		
 
 	private void setupMenu() {
 		// Menüleiste anlegen ...
