@@ -211,7 +211,6 @@ public class Login_Panel extends JPanel {
 			if (rdbtnMitarbeiter.isSelected()) {
 				try {
 					loggedNutzer = shop.mitarbeiterEinloggen(userName, password);
-				
 					JOptionPane.showMessageDialog(null, "Du hast erfolgreich angemeldet!", "Info Message",
 							JOptionPane.INFORMATION_MESSAGE);
 					loginStatus = true;

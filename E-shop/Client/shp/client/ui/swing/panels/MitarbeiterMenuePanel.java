@@ -318,6 +318,7 @@ public class MitarbeiterMenuePanel extends JPanel {
 	}
 
 	protected void do_btn_MA_regestrieren_actionPerformed(ActionEvent e) {
+		
 		MARegestrierenDialog regDialog = new MARegestrierenDialog(shop);
 
 		// Setze das Dialogfenster als modal, um zu verhindern, dass Benutzer auf das

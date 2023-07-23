@@ -114,7 +114,7 @@ public interface E_ShopInterface {
 	// Kunde Methoden
 	public Kunde sucheKunde(String nutzerName);
 
-	public void kundenRegistrieren(String name, String vorname, String nutzerNr, String passwort, String strasse,
+	public Kunde kundenRegistrieren(String name, String vorname, String nutzerNr, String passwort, String strasse,
 			String hNr, String plz, String ort, String land) throws KundeUsernameIstbenutztException;
 
 	public Kunde kundenEinloggen(String nutzerName, String passwort) throws NutzernameOderPasswortFalschException;

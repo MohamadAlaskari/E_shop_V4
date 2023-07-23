@@ -212,8 +212,6 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 		this.setVisible(true);
 	}
 
-		
-
 	private void setupMenu() {
 		// Menüleiste anlegen ...
 		JMenuBar mBar = new JMenuBar();
@@ -310,12 +308,12 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 		this.loggedNutzer = loggednutzer;
 
 		getContentPane().removeAll();
-
-		if (shop.sucheMitarbeiter(loggednutzer.getNutzerName()) != null) {
+		initialize(loggednutzer);
+	/*	if (shop.sucheKunde(loggednutzer.getNutzerName()) != null) {
+			
+		} else if (shop.sucheMitarbeiter(loggednutzer.getNutzerName()) != null) {
 			initialize(loggednutzer);
-		} else if (shop.sucheKunde(loggednutzer.getNutzerName()) != null) {
-			initialize(loggednutzer);
-		}
+		}*/
 	}
 
 	@Override
@@ -337,6 +335,7 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 		scrollPane.setBorder(BorderFactory.createTitledBorder("Artikeln"));
 
 	}
+
 	@Override
 	public void updateTable() {
 		artikeln = shop.gibAlleArtikeln();
@@ -344,7 +343,6 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 		artikelnTablePanel.setModel(artikelTableModel);
 		scrollPane.setBorder(BorderFactory.createTitledBorder("Artikeln"));
 	}
-	
 
 	@Override
 	public void updateToVerlauf(List<Verlauf> verlaufListe) {
@@ -353,7 +351,7 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 		artikelnTablePanel.setModel(verTableModel);
 		scrollPane.setBorder(BorderFactory.createTitledBorder("Verlauf"));
 	}
-	
+
 	@Override
 	public void updateWarenKorb() {
 		Kunde k = (Kunde) loggedNutzer;
@@ -388,8 +386,6 @@ public class BibGuiMitKomponenten extends JFrame implements SearchArtikelsPanel.
 		artikelnTablePanel.setModel(artikelTableModel2Kunde);
 		scrollPane.setBorder(BorderFactory.createTitledBorder("Artikeln"));
 	}
-
-	
 
 	@Override
 	public Artikel onSelectedRow_Kunde() {

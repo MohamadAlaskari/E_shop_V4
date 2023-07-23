@@ -9,17 +9,21 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Vector;
 
+import shp.common.entities.Adresse;
 import shp.common.entities.Artikel;
 import shp.common.entities.Kunde;
 import shp.common.entities.Massengutartikel;
 import shp.common.entities.Mitarbeiter;
+import shp.common.entities.Verlauf;
 import shp.common.exceptions.AnzahlIsNichtDefiniertException;
 import shp.common.exceptions.ArtikelExistiertBereitsException;
 import shp.common.exceptions.ArtikelExistiertNichtException;
 import shp.common.exceptions.BestandPasstNichtMitPackungsGroesseException;
+import shp.common.exceptions.KundeUsernameIstbenutztException;
 import shp.common.exceptions.MitarbeiterUsernameIstBenutztException;
 import shp.common.exceptions.NutzernameOderPasswortFalschException;
 import shp.common.exceptions.SenkenUnterNullNichtMoeglichException;
+import shp.common.exceptions.VerlaufLeerException;
 import shp.common.interfaces.E_ShopInterface;
 
 /**
@@ -98,19 +102,16 @@ class ClientRequestProcessor implements Runnable {
 
 			// Eingabe bearbeiten:
 			if (input == null) {
-
-				// input wird von readLine() auf null gesetzt, wenn Client Verbindung abbricht
-				// Einfach behandeln wie ein "quit"
 				input = "q";
+			} else if (input.equals("sucheartikel")) {
+				sucheArtikelNachName();
 			} else if (input.equals("a")) {
-				ausgeben();
-			} else if (input.equals("k")) {
-				kundenEinloggen();
+				getArtikeln();
 			} else if (input.equals("d")) {
-				loeschen();
-			} else if (input.equals("h")) {
+				loescheArtikel();
+			} else if (input.equals("erhoehen")) {
 				erhoheArtikelBestand();
-			} else if (input.equals("w")) {
+			} else if (input.equals("senken")) {
 				senkeArtikelBestand();
 			} else if (input.equals("j")) {
 				checkMassengutatikel();
@@ -123,35 +124,67 @@ class ClientRequestProcessor implements Runnable {
 			} else if (input.equals("x")) {
 				schreibeArtikel();
 			}
-			/////////////////////Mitarbeiter/////////////////////////
+			///////////////////// Mitarbeiter/////////////////////////
 			else if (input.equals("maeinloggen")) {
-                mitarbeiterEinlogen();
-            } else if (input.equals("masuchen")) {
-                mitarbeiterSuchen();
-            } else if (input.equals("maregestrieren")) {
-                mitarbeiterRegistrieren();
-            } else if (input.equals("malogout")) {
-                mitarbeiterLogout();
-            } else if (input.equals("mashreiben")) {
-                mitarbeiterSchreiben();
-            } else if (input.equals("gibAlleMitarbeiter")) {
-                sendeMitArbeiter_List_AnClient();
-            }
-			/////////////////////Ende Mitarbeiter/////////////////////////
+				mitarbeiterEinlogen();
+			} else if (input.equals("masuchen")) {
+				mitarbeiterSuchen();
+			} else if (input.equals("maregestrieren")) {
+				mitarbeiterRegistrieren();
+			} else if (input.equals("malogout")) {
+				mitarbeiterLogout();
+			} else if (input.equals("mashreiben")) {
+				mitarbeiterSchreiben();
+			} else if (input.equals("gibAlleMitarbeiter")) {
+				sendeMitArbeiter_List_AnClient();
+			}
+			///////////////////// Ende Mitarbeiter/////////////////////////
+			// ---------------------------kunde----------------------------//
+			else if (input.equals("regK")) {
+				kundenRegistrieren();
+			} else if (input.equals("suchenKunde")) {
+				sucheKunde();
+			} else if (input.equals("einlogenk")) {
+				kundenEinloggen();
+			}
+//--------------------------Endekunde-----------------------------//
+			///////////////////// Verlaus/////////////////////////
+			else if (input.equals("gibVerlaufListe")) {
+				gibVerlaufListe();
+			}
 
 			else if (input.equals("s")) {
 				// Aktion "_s_peichern" gewählt
 				speichern();
 			}
-			// ---
-			// weitere Server-Dienste ...
-			// ---
 
 		} while (!(input.equals("q")));
 
 		// Verbindung wurde vom Client abgebrochen:
 		disconnect();
 	}
+
+	private void gibVerlaufListe() {
+		List<Verlauf> verlausf_List = null;
+		try {
+			out.println("Erfolg");
+			verlausf_List = shop.gibVerlauflistaus();
+			out.println(verlausf_List.size());
+			for (Verlauf verlauf : verlausf_List) {
+				sendeVerlaufanClient(verlauf);
+			}
+		} catch (VerlaufLeerException e) {
+			out.println("Fehler");
+		}
+
+	}
+
+	private void sendeVerlaufanClient(Verlauf verlauf) {
+		out.println(verlauf.getAktion());
+		
+	}
+
+///////////////////////// Ende Verlauf   ///////////////////////////
 
 /////////////////////////Mitarbeiter ///////////////////////////
 	private Mitarbeiter mitarbeiterEinlogen() {
@@ -200,11 +233,16 @@ class ClientRequestProcessor implements Runnable {
 		try {
 			mitarbeiter = shop.sucheMitarbeiter(nutzername);
 			out.println("Erfolg");
-			sendeMitarbeiterAnClient(mitarbeiter);
+			if (mitarbeiter != null) {
+
+				sendeMitarbeiterAnClient(mitarbeiter);
+			} else {
+				out.println("");
+			}
 
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-        // wir haben noch keine exception
+			// wir haben noch keine exception
 			System.out.println("mitarbeiter mit '" + nutzername + "' nicht gefunden");
 			out.println("Fehler");
 
@@ -228,11 +266,13 @@ class ClientRequestProcessor implements Runnable {
 	}
 
 	private void sendeMitarbeiterAnClient(Mitarbeiter mitarbeiter) {
-		out.println(mitarbeiter.getMaId());
-		out.println(mitarbeiter.getName());
-		out.println(mitarbeiter.getVorname());
-		out.println(mitarbeiter.getNutzerName());
-		out.println(mitarbeiter.getPasswort());
+		if (mitarbeiter != null) {
+			out.println(mitarbeiter.getMaId());
+			out.println(mitarbeiter.getName());
+			out.println(mitarbeiter.getVorname());
+			out.println(mitarbeiter.getNutzerName());
+			out.println(mitarbeiter.getPasswort());
+		}
 	}
 
 	private void mitarbeiterLogout() {
@@ -310,12 +350,12 @@ class ClientRequestProcessor implements Runnable {
 	}
 //////////////////////////Ende Mitarbeiter/////////////////////////////
 
-	private void ausgeben() {
+	private void getArtikeln() {
 		// Die Arbeit soll wieder das Bibliotheksverwaltungsobjekt machen:
-		List<Artikel> artikel = null;
-		artikel = shop.gibAlleArtikeln();
+		List<Artikel> artikeln = null;
+		artikeln = shop.gibAlleArtikeln();
 
-		sendeArtikelListAnClient(artikel);
+		sendeArtikelListAnClient(artikeln);
 	}
 
 	private void sendeArtikelListAnClient(List<Artikel> artikeln) {
@@ -363,13 +403,15 @@ class ClientRequestProcessor implements Runnable {
 
 	public void fuegeArtikelEin() {
 		Mitarbeiter mitarbeiter = getMitarbeiterVonClient();
+		System.out.println(mitarbeiter);
 		Artikel artikel = getArtikelVonClient();
 
 		try {
+
 			artikel = shop.fuegeArtikelEin(mitarbeiter, artikel.getName(), artikel.getBeschreibung(),
 					artikel.getBestand(), artikel.getPreis(), artikel.getIstPackung());
-			sendeArtikelAnClient(artikel);
 			out.println("Erfolg");
+			sendeArtikelAnClient(artikel);
 		} catch (AnzahlIsNichtDefiniertException | ArtikelExistiertBereitsException
 				| BestandPasstNichtMitPackungsGroesseException | ArtikelExistiertNichtException e) {
 
@@ -379,10 +421,9 @@ class ClientRequestProcessor implements Runnable {
 
 	}
 
-	public void sucheArtikelNachName() throws ArtikelExistiertNichtException {
+	public void sucheArtikelNachName() {
 		String input = null;
-		// lese die notwendigen Parameter, einzeln pro Zeile
-		// hier ist nur der Titel der gesuchten Bücher erforderlich:
+
 		try {
 			input = in.readLine();
 		} catch (Exception e) {
@@ -390,14 +431,14 @@ class ClientRequestProcessor implements Runnable {
 			System.out.println(e.getMessage());
 		}
 		String name = input;
-		List<Artikel> artikeln = null;
-		Artikel artikel = null;
-		if (name.equals("")) {
-			artikeln = shop.gibAlleArtikeln();
-			sendeArtikelListAnClient(artikeln);
-		} else {
-			artikel = shop.sucheArtikelNachName(name);
+
+		try {
+			out.println("Erfolg");
+			Artikel artikel = shop.sucheArtikelNachName(name);
 			sendeArtikelAnClient(artikel);
+		} catch (ArtikelExistiertNichtException e) {
+			e.getMessage();
+			out.println("Fehler");
 		}
 
 	}
@@ -416,10 +457,9 @@ class ClientRequestProcessor implements Runnable {
 		}
 	}
 
-	private void loeschen() {
+	private void loescheArtikel() {
 		String input = null;
-		// lese die notwendigen Parameter, einzeln pro Zeile
-		// zuerst die Nummer des einzufügenden Buchs:
+
 		Mitarbeiter mitarbeiter = getMitarbeiterVonClient();
 		try {
 			input = in.readLine();
@@ -430,20 +470,22 @@ class ClientRequestProcessor implements Runnable {
 		String artikelName = input;
 
 		try {
-			shop.loescheArtikel(mitarbeiter, artikelName);
+
+			out.println("Erfolg");
+			Artikel artikel = shop.loescheArtikel(mitarbeiter, artikelName);
+			sendeArtikelAnClient(artikel);
 		} catch (ArtikelExistiertNichtException e) {
 			e.getMessage();
 			out.println("Fehler");
 		}
 		// Rückmeldung an den Client: Aktion erfolgreich!
-		out.println("Erfolg");
 	}
 
 	private void erhoheArtikelBestand() {
 		String input = null;
-		// lese die notwendigen Parameter, einzeln pro Zeile
-		// zuerst die Nummer des einzufügenden Buchs:
+
 		Mitarbeiter mitarbeiter = getMitarbeiterVonClient();
+
 		try {
 			input = in.readLine();
 		} catch (Exception e) {
@@ -461,23 +503,21 @@ class ClientRequestProcessor implements Runnable {
 		int anzahl = Integer.parseInt(input);
 
 		try {
-			shop.erhoeheArtikelBestand(mitarbeiter, artikelName, anzahl);
+			out.println("Erfolg");
+			Artikel artikel = shop.erhoeheArtikelBestand(mitarbeiter, artikelName, anzahl);
+			sendeArtikelAnClient(artikel);
 		} catch (ArtikelExistiertNichtException | BestandPasstNichtMitPackungsGroesseException e) {
 			// TODO Auto-generated catch block
 			e.getMessage();
 			out.println("Fehler");
 		}
-
-		// Rückmeldung an den Client: Aktion erfolgreich!
-		out.println("Erfolg");
-
 	}
 
 	private void senkeArtikelBestand() {
 		String input = null;
-		// lese die notwendigen Parameter, einzeln pro Zeile
-		// zuerst die Nummer des einzufügenden Buchs:
+
 		Mitarbeiter mitarbeiter = getMitarbeiterVonClient();
+
 		try {
 			input = in.readLine();
 		} catch (Exception e) {
@@ -495,16 +535,15 @@ class ClientRequestProcessor implements Runnable {
 		int anzahl = Integer.parseInt(input);
 
 		try {
-			shop.senkenArtikelBestand(mitarbeiter, artikelName, anzahl);
+			out.println("Erfolg");
+			Artikel artikel = shop.senkenArtikelBestand(mitarbeiter, artikelName, anzahl);
+			sendeArtikelAnClient(artikel);
 		} catch (ArtikelExistiertNichtException | BestandPasstNichtMitPackungsGroesseException
 				| SenkenUnterNullNichtMoeglichException e) {
-
 			e.getMessage();
 			out.println("Fehler");
+			e.printStackTrace();
 		}
-
-		// Rückmeldung an den Client: Aktion erfolgreich!
-		out.println("Erfolg");
 
 	}
 
@@ -545,6 +584,28 @@ class ClientRequestProcessor implements Runnable {
 
 	// kunde
 
+	// ---------------------------------- kunde----------------------------//
+	public void sucheKunde() {
+		Kunde kunde = null;
+		String input = "";
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (Nutzername K): ");
+			System.out.println(e.getMessage());
+		}
+		String nutzername = input;
+
+		try {
+			kunde = shop.sucheKunde(nutzername);
+			out.println("Erfolg");
+			sendeKundeAnClient(kunde);
+		} catch (Exception e) {
+			out.println("Fehler");
+		}
+
+	}
+
 	public Kunde kundenEinloggen() {
 		Kunde kunde = null;
 		String input = "";
@@ -571,10 +632,108 @@ class ClientRequestProcessor implements Runnable {
 			sendeKundeAnClient(kunde);
 
 		} catch (NutzernameOderPasswortFalschException e) {
+			out.println("Fehler");
 			System.out.println(e.getMessage());
 		}
 		return kunde;
 
+	}
+
+	public Kunde kundenRegistrieren() {
+		Kunde kunde = null;
+		String input = "";
+
+		String name;
+		String vorname;
+		String userName;
+		String password;
+		String strasse;
+		String hNr;
+		String plz;
+		String ort;
+		String land;
+
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde name): ");
+			System.out.println(e.getMessage());
+		}
+		name = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde vorname): ");
+			System.out.println(e.getMessage());
+		}
+		vorname = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde userName): ");
+			System.out.println(e.getMessage());
+		}
+		userName = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde password): ");
+			System.out.println(e.getMessage());
+		}
+		password = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde strasse): ");
+			System.out.println(e.getMessage());
+		}
+		strasse = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde hNr): ");
+			System.out.println(e.getMessage());
+		}
+		hNr = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde plz): ");
+			System.out.println(e.getMessage());
+		}
+		plz = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde ort): ");
+			System.out.println(e.getMessage());
+		}
+		ort = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (kunde land): ");
+			System.out.println(e.getMessage());
+		}
+		land = input;
+		try {
+			kunde = shop.kundenRegistrieren(name, vorname, userName, password, strasse, hNr, plz, ort, land);
+			out.println("Erfolg");
+			sendeKundeAnClient(new Kunde(name, vorname, userName, password, new Adresse(strasse, hNr, plz, ort, land)));
+			schreibeKunde();
+		} catch (KundeUsernameIstbenutztException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return kunde;
+	}
+
+	public void schreibeKunde() {
+		try {
+			shop.schreibeKunde();
+		} catch (IOException e) {
+			e.getMessage();
+		}
 	}
 
 	private void sendeKundeAnClient(Kunde kunde) {
@@ -592,34 +751,57 @@ class ClientRequestProcessor implements Runnable {
 
 	}
 
+	//////////////////////////// Ende kund ///////////////////////
+
 	private Mitarbeiter getMitarbeiterVonClient() {
+		Mitarbeiter mitarbeiter;
 		String input = "";
-		int maId;
-		String name;
-		String vorname;
-		String nutzerName;
-		String passwort;
 		try {
 			input = in.readLine();
 		} catch (Exception e) {
-			System.out.println("--->Fehler beim Lesen vom Client (Mitarbeiter id): ");
+			System.out.println("--->Fehler beim Lesen vom Client (Name mitarbeiterRegistrieren): ");
 			System.out.println(e.getMessage());
 		}
-		maId = Integer.parseInt(input);
+		String idstring = input;
+		int id = Integer.parseInt(idstring);
 		try {
 			input = in.readLine();
 		} catch (Exception e) {
-			System.out.println("--->Fehler beim Lesen vom Client (Mitarbeiter name): ");
+			System.out.println("--->Fehler beim Lesen vom Client (Name mitarbeiterRegistrieren): ");
 			System.out.println(e.getMessage());
 		}
-		name = input;
-		return null;
+		String name = input;
+
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (vorName mitarbeiterRegistrieren): ");
+			System.out.println(e.getMessage());
+		}
+		String vorName = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (nutzerName mitarbeiterRegistrieren): ");
+			System.out.println(e.getMessage());
+		}
+		String nutzerName = input;
+		try {
+			input = in.readLine();
+		} catch (Exception e) {
+			System.out.println("--->Fehler beim Lesen vom Client (password mitarbeiterRegistrieren): ");
+			System.out.println(e.getMessage());
+		}
+		String password = input;
+
+		mitarbeiter = new Mitarbeiter(id, name, vorName, nutzerName, password);
+		return mitarbeiter;
 	}
 
 	private Artikel getArtikelVonClient() {
 		String input = "";
 		Artikel artikel = null;
-		int artikelId;
+
 		String name;
 		String beschreibung;
 		int bestand;
@@ -627,13 +809,7 @@ class ClientRequestProcessor implements Runnable {
 		boolean verfuegbar;
 		boolean istPackung = false;
 		int packungsGroesse;
-		try {
-			input = in.readLine();
-		} catch (Exception e) {
-			System.out.println("--->Fehler beim Lesen vom Client (Mitarbeiter id): ");
-			System.out.println(e.getMessage());
-		}
-		artikelId = Integer.parseInt(input);
+
 		try {
 			input = in.readLine();
 		} catch (Exception e) {
@@ -662,13 +838,7 @@ class ClientRequestProcessor implements Runnable {
 			System.out.println(e.getMessage());
 		}
 		preis = Double.parseDouble(input);
-		try {
-			input = in.readLine();
-		} catch (Exception e) {
-			System.out.println("--->Fehler beim Lesen vom Client (Mitarbeiter name): ");
-			System.out.println(e.getMessage());
-		}
-		verfuegbar = Boolean.parseBoolean(input);
+
 		try {
 			input = in.readLine();
 		} catch (Exception e) {
@@ -682,15 +852,16 @@ class ClientRequestProcessor implements Runnable {
 			try {
 				input = in.readLine();
 			} catch (Exception e) {
-				System.out.println("--->Fehler beim Lesen vom Client (Mitarbeiter name): ");
+				System.out.println("--->Fehler beim Lesen vom Client (Mitarbeiter name):");
 				System.out.println(e.getMessage());
 			}
 			packungsGroesse = Integer.parseInt(input);
-			artikel = new Massengutartikel(artikelId, name, beschreibung, bestand, preis, verfuegbar, istPackung,
-					packungsGroesse);
+			artikel = new Massengutartikel(name, beschreibung, bestand, preis, istPackung, packungsGroesse);
 		} else {
-			artikel = new Artikel(artikelId, name, beschreibung, bestand, preis, verfuegbar, istPackung);
+			artikel = new Artikel(name, beschreibung, bestand, preis, istPackung);
+
 		}
+		System.out.println(artikel);
 		return artikel;
 	}
 

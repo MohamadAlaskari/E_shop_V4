@@ -14,6 +14,10 @@ public class KundeUsernameIstbenutztException extends Exception{
 		super("Kunde: Nutzername " + kunde.getNutzerName()+ " existiert bereits " + zusatzMsg);
 		this.kunde = kunde;
 	}
+	public KundeUsernameIstbenutztException() {
+		super("Kunde: Nutzername existiert bereits " );
+		
+	}
 
 	public Kunde getKunde() {
 		return kunde;

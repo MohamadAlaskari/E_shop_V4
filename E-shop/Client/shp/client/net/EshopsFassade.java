@@ -35,10 +35,10 @@ import shp.common.interfaces.E_ShopInterface;
 
 /**
  * Klasse mit Fassade der Bibliothek auf Client-Seite. Die Klasse stellt die von
- * der GUI erwarteten Methoden zur Verfügung und realisiert (transparent für
- * die GUI) die Kommunikation mit dem Server. Anmerkung: Auf dem Server wird
- * dann die eigentliche, von der lokalen Bibliotheksversion bekannte
- * Funktionalität implementiert (z.B. Bücher einfügen und suchen)
+ * der GUI erwarteten Methoden zur Verfügung und realisiert (transparent für die
+ * GUI) die Kommunikation mit dem Server. Anmerkung: Auf dem Server wird dann
+ * die eigentliche, von der lokalen Bibliotheksversion bekannte Funktionalität
+ * implementiert (z.B. Bücher einfügen und suchen)
  * 
  * 
  */
@@ -119,24 +119,27 @@ public class EshopsFassade implements E_ShopInterface {
 		return liste;
 	}
 
-
-
 	@Override
 	public Artikel sucheArtikelNachName(String name) throws ArtikelExistiertNichtException {
 		Artikel artikel = null;
-		sout.println("f");
+		sout.println("sucheartikel");
 		sout.println(name);
-
+		String antwort = "Fehler";
 		try {
-			artikel = liesArtikelVonServer();
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				artikel = liesArtikelVonServer();
+				return artikel;
+			} else {
+				String messag = sin.readLine();
+				System.out.println(messag);
+			}
+
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
-			return null;
 		}
 		return artikel;
 	}
-
-	
 
 	private Artikel liesArtikelVonServer() throws IOException {
 		String antwort;
@@ -169,10 +172,8 @@ public class EshopsFassade implements E_ShopInterface {
 		} else {
 			artikel = new Artikel(id, artikelName, beschreibung, bestand, preis, verfuegbarkeit, istPackung);
 		}
-
 		return artikel;
 	}
-
 
 	@Override
 	public void gibArtikelnlisteAus(List<Artikel> artikelListe) {
@@ -188,7 +189,7 @@ public class EshopsFassade implements E_ShopInterface {
 		System.out.println(antwort);
 
 	}
-	
+
 	private void sendeArtikelListAnServer(List<Artikel> artikeln) {
 		// Anzahl der gefundenen Bücher senden
 		sout.println(artikeln.size());
@@ -196,7 +197,7 @@ public class EshopsFassade implements E_ShopInterface {
 			sendeArtikelAnServer(artikel);
 		}
 	}
-	
+
 	private void sendeArtikelAnServer(Artikel artikel) {
 		sout.println(artikel.getArtikelId());
 		sout.println(artikel.getName());
@@ -210,8 +211,7 @@ public class EshopsFassade implements E_ShopInterface {
 			sout.println(artikel_1.getPackungsGroesse());
 		}
 	}
-	
-	
+
 	@Override
 	public Artikel fuegeArtikelEin(Mitarbeiter mitarbeiter, String name, String beschreibung, int bestand, double preis,
 			boolean istPackung) throws AnzahlIsNichtDefiniertException, ArtikelExistiertBereitsException,
@@ -242,7 +242,7 @@ public class EshopsFassade implements E_ShopInterface {
 		}
 
 	}
-	
+
 	@Override
 	public Artikel fuegeMassenArtikelEin(Mitarbeiter mitarbeiter, String name, String beschreibung, int bestand,
 			double preis, boolean istPackung, int packungsGroesse)
@@ -271,72 +271,92 @@ public class EshopsFassade implements E_ShopInterface {
 		}
 	}
 
-
-	
-
 	@Override
 	public Artikel loescheArtikel(Mitarbeiter mitarbeiter, String name) throws ArtikelExistiertNichtException {
+
+		Artikel artikel = null;
 		sout.println("d");
 		sendMitarbeiterAnServer(mitarbeiter);
 		sout.println(name);
-		String antwort="?";
+		String antwort = "?";
 		try {
 			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				artikel = liesArtikelVonServer();
+				System.out.println(artikel);
+			} else {
+				String messag = sin.readLine();
+				System.out.println(messag);
+			}
+
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
-		Artikel artikel = sucheArtikelNachName(name);
+		// Artikel artikel = sucheArtikelNachName(name);
 		System.out.println(antwort);
 		return artikel;
 	}
-	
-	
+
 	@Override
 	public Artikel erhoeheArtikelBestand(Mitarbeiter mitarbeiter, String name, int anzahl)
 			throws ArtikelExistiertNichtException, BestandPasstNichtMitPackungsGroesseException {
-		sout.println("h");
+		Artikel artikel = null;
+		sout.println("erhoehen");
 		sendMitarbeiterAnServer(mitarbeiter);
 		sout.println(name);
 		sout.println(anzahl);
-		String antwort="?";
+
+		String antwort = "?";
 		try {
 			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				artikel = liesArtikelVonServer();
+				return artikel;
+			} else {
+				String message = sin.readLine();
+				System.out.println(message);
+			}
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
-		System.out.println(antwort);
-		Artikel artikel = sucheArtikelNachName(name);
+
 		return artikel;
 	}
-	
-	
+
 	@Override
 	public Artikel senkenArtikelBestand(Mitarbeiter mitarbeiter, String name, int anzahl)
 			throws ArtikelExistiertNichtException, BestandPasstNichtMitPackungsGroesseException,
 			SenkenUnterNullNichtMoeglichException {
-		
-		sout.println("h");
+		Artikel artikel = null;
+		sout.println("senken");
 		sendMitarbeiterAnServer(mitarbeiter);
 		sout.println(name);
 		sout.println(anzahl);
-		String antwort="?";
+
+		String antwort = "?";
 		try {
 			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				artikel = liesArtikelVonServer();
+				return artikel;
+			} else {
+				String message = sin.readLine();
+				System.out.println(message);
+			}
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 		}
-		System.out.println(antwort);
-		Artikel artikel = sucheArtikelNachName(name);
+
 		return artikel;
 	}
-	
-	
+
 	@Override
 	public boolean checkMassengutatikel(Artikel artikel) throws ArtikelExistiertNichtException {
 		boolean status = false;
 		sout.println("j");
-		sendArtikelAnServer(artikel.getName(), artikel.getBeschreibung(), artikel.getBestand(), artikel.getPreis(), artikel.getIstPackung());
-		String antwort="?";
+		sendArtikelAnServer(artikel.getName(), artikel.getBeschreibung(), artikel.getBestand(), artikel.getPreis(),
+				artikel.getIstPackung());
+		String antwort = "?";
 		try {
 			antwort = sin.readLine();
 		} catch (Exception e) {
@@ -346,37 +366,39 @@ public class EshopsFassade implements E_ShopInterface {
 		System.out.println(antwort);
 		return status;
 	}
-	
+
 	@Override
 	public Massengutartikel artikelZuMassengeutartikel(Artikel artikel) throws ArtikelExistiertNichtException {
 		sout.println("n");
-		sendArtikelAnServer(artikel.getName(), artikel.getBeschreibung(), artikel.getBestand(), artikel.getPreis(), artikel.getIstPackung());
-		Massengutartikel artikel_1= null;
+		sendArtikelAnServer(artikel.getName(), artikel.getBeschreibung(), artikel.getBestand(), artikel.getPreis(),
+				artikel.getIstPackung());
+		Massengutartikel artikel_1 = null;
 		try {
 			artikel_1 = (Massengutartikel) liesArtikelVonServer();
-			
+
 		} catch (IOException e) {
 			e.getMessage();
 		}
 		return artikel_1;
 	}
-	
-
 
 	@Override
 	public void schreibeArtikel() throws IOException {
 		sout.println("x");
 
 	}
-	
+
 	private void sendArtikelAnServer(String name, String beschreibung, int bestand, double preis, boolean istPackung) {
+
 		sout.println(name);
 		sout.println(beschreibung);
 		sout.println(bestand);
 		sout.println(preis);
 		sout.println(istPackung);
 	}
-	private void sendMassengutArtikelAnServer(String name, String beschreibung, int bestand, double preis, boolean istPackung, int packungsGroesse) {
+
+	private void sendMassengutArtikelAnServer(String name, String beschreibung, int bestand, double preis,
+			boolean istPackung, int packungsGroesse) {
 		sout.println(name);
 		sout.println(beschreibung);
 		sout.println(bestand);
@@ -388,83 +410,9 @@ public class EshopsFassade implements E_ShopInterface {
 	private void sendMitarbeiterAnServer(Mitarbeiter mitarbeiter) {
 		sout.println(mitarbeiter.getMaId());
 		sout.println(mitarbeiter.getName());
+		sout.println(mitarbeiter.getVorname());
 		sout.println(mitarbeiter.getNutzerName());
 		sout.println(mitarbeiter.getPasswort());
-		sout.println(mitarbeiter.getVorname());
-	}
-	
-
-	// Kunde
-
-	@Override
-	public Kunde kundenEinloggen(String nutzerName, String passwort) {
-		sout.println("k");
-		sout.println(nutzerName);
-		sout.println(passwort);
-
-		String antwort = "Fehler";
-		try {
-			antwort = sin.readLine();
-			if (antwort.equals("Erfolg")) {
-				Kunde kunde = liesKundevonServer();
-				loggedNutzer = kunde;
-				return kunde;
-			} else {
-				throw new NutzernameOderPasswortFalschException();
-			}
-
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-		}
-
-		return null;
-	}
-
-	public Kunde liesKundevonServer() throws IOException {
-
-		String antwort;
-		Kunde kunde = null;
-
-		antwort = sin.readLine();
-		// System.out.println("fadafa "+antwort);
-		int id = Integer.parseInt(antwort);
-		String name = sin.readLine();
-		String vorname = sin.readLine();
-		String nutzerName = sin.readLine();
-		String password = sin.readLine();
-
-		String strasse = sin.readLine();
-		String hNr = sin.readLine();
-		String ort = sin.readLine();
-		String plz = sin.readLine();
-		String land = sin.readLine();
-
-		Adresse adresse = new Adresse(strasse, hNr, plz, ort, land);
-
-		kunde = new Kunde(id, name, vorname, nutzerName, password, adresse);
-		return kunde;
-
-	}
-
-	/**
-	 * Methode zum Speichern des Buchbestands in einer Datei.
-	 * 
-	 * @throws IOException
-	 */
-	public void schreibeBuecher() throws IOException {
-		// Kennzeichen für gewählte Aktion senden
-		sout.println("s");
-		// (Parameter sind hier nicht zu senden)
-
-		// Antwort vom Server lesen:
-		String antwort = "Fehler";
-		try {
-			antwort = sin.readLine();
-		} catch (Exception e) {
-			System.err.println(e.getMessage());
-			return;
-		}
-		System.out.println(antwort);
 	}
 
 	@Override
@@ -484,238 +432,304 @@ public class EshopsFassade implements E_ShopInterface {
 		System.out.println(antwort);
 	}
 
+	// -------------------- Kunde-------------------------//
 
+	@Override
+	public Kunde kundenEinloggen(String nutzerName, String passwort) {
+		sout.println("einlogenk");
+		sout.println(nutzerName);
+		sout.println(passwort);
 
-	
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				Kunde kunde = liesKundevonServer();
+				return kunde;
+			} else {
+				throw new NutzernameOderPasswortFalschException();
+			}
 
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 
-	
-
-	
-
-	
+		return null;
+	}
 
 	@Override
 	public Kunde sucheKunde(String nutzerName) {
-		// TODO Auto-generated method stub
+
+		sout.println("suchenKunde");
+		sout.println(nutzerName);
+
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				Kunde kunde = liesKundevonServer();
+
+				return kunde;
+			} else {
+				throw new NutzernameOderPasswortFalschException();
+			}
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 		return null;
 	}
 
 	@Override
-	public void kundenRegistrieren(String name, String vorname, String nutzerNr, String passwort, String strasse,
+	public Kunde kundenRegistrieren(String name, String vorname, String nutzerNr, String passwort, String strasse,
 			String hNr, String plz, String ort, String land) throws KundeUsernameIstbenutztException {
-		// TODO Auto-generated method stub
+		Kunde kunde = null;
+		sout.println("regK");
+		sendeKundeAnServer(new Kunde(name, vorname, nutzerNr, passwort, new Adresse(strasse, hNr, plz, ort, land)));
 
-	}
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				kunde = liesKundevonServer();
+				schreibeKunde();
+				return kunde;
+			} else {
 
-	@Override
-	public List<Bestellung> GibAlleMeineBestellungen(Kunde kunde) {
-		// TODO Auto-generated method stub
+				throw new KundeUsernameIstbenutztException(null, "");
+
+			}
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+		}
 		return null;
 	}
 
+	// todo
 	@Override
 	public void loggeKundeAus(Kunde kunde) {
-		// TODO Auto-generated method stub
+
+		sout.println("auslogenK");
 
 	}
 
 	@Override
-	public List<Kunde> gibAlleKunden() {
+	public List<Kunde> gibAlleKunden() { // nicht verwendet
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void schreibeKunde() throws IOException {
-		// TODO Auto-generated method stub
+	public void schreibeKunde() {
+		sout.println("s");
+	}
+
+	public void sendeKundeAnServer(Kunde kunde) {
+		sout.println(kunde.getName());
+		sout.println(kunde.getVorname());
+		sout.println(kunde.getNutzerName());
+		sout.println(kunde.getPasswort());
+		sout.println(kunde.getAdresse().getStrasse());
+		sout.println(kunde.getAdresse().gethNr());
+		sout.println(kunde.getAdresse().getPlz());
+		sout.println(kunde.getAdresse().getOrt());
+		sout.println(kunde.getAdresse().getLand());
 
 	}
+
+	public Kunde liesKundevonServer() throws IOException {
+
+		String antwort;
+		Kunde kunde = null;
+
+		antwort = sin.readLine();
+		int id = Integer.parseInt(antwort);
+		String name = sin.readLine();
+		String vorname = sin.readLine();
+		String nutzerName = sin.readLine();
+		String password = sin.readLine();
+
+		String strasse = sin.readLine();
+		String hNr = sin.readLine();
+		String ort = sin.readLine();
+		String plz = sin.readLine();
+		String land = sin.readLine();
+
+		Adresse adresse = new Adresse(strasse, hNr, plz, ort, land);
+		kunde = new Kunde(id, name, vorname, nutzerName, password, adresse);
+
+		return kunde;
+	}
+	// -------------------------- Ende kunde--------------------------//
+
 //////////////////////////Mitarbeiter //////////////////////////////////
-@Override
-public Mitarbeiter sucheMitarbeiter(String nutzerName) {
-sout.println("masuchen");
-sout.println(nutzerName);
+	@Override
+	public Mitarbeiter sucheMitarbeiter(String nutzerName) {
+		sout.println("masuchen");
+		sout.println(nutzerName);
 
-String antwort = "Fehler";
-try {
-antwort = sin.readLine();
-if (antwort.equals("Erfolg")) {
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				Mitarbeiter mitarbeiter = liesMitarbeiterVonServer();
+				return mitarbeiter;
 
-Mitarbeiter mitarbeiter = liesMitarbeiterVonServer();
-return mitarbeiter;
+			} else {
+				String message = sin.readLine();
+				System.out.println(message);
+				// TODO Auto-generated method stub
 
-} else {
+			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public List<String> mitarbeiterMenue() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void mitarbeiterEinfuegen(String name, String vorName, String nutzerName, String passwort)
+			throws MitarbeiterUsernameIstBenutztException {
+
+	}
+
+	@Override
+	public Mitarbeiter mitarbeiterEinloggen(String nutzerName, String passwort)
+			throws NutzernameOderPasswortFalschException {
+
+		sout.println("maeinloggen");
+		sout.println(nutzerName);
+		sout.println(passwort);
+
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				Mitarbeiter mitarbeiter = liesMitarbeiterVonServer();
+				return mitarbeiter;
+			} else {
 // Fehler: Exception (re-)konstruieren
-String message = sin.readLine();
-System.out.println(message);
-}
-} catch (IOException e) {
-System.err.println(e.getMessage());
-}
-return null;
-}
+				String message = sin.readLine();
+				System.out.println(message);
+				throw new NutzernameOderPasswortFalschException();
+			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			return null;
+		}
+	}
 
-@Override
-public List<String> mitarbeiterMenue() {
-// TODO Auto-generated method stub
-return null;
-}
+	@Override
+	public void regestiereNeueMitarbeiter(String name, String vorName, String nutzerName, String passwort)
+			throws MitarbeiterUsernameIstBenutztException {
 
-@Override
-public void mitarbeiterEinfuegen(String name, String vorName, String nutzerName, String passwort)
-throws MitarbeiterUsernameIstBenutztException {
-/*
-* Mitarbeiter mitarbeiter = null; sout.println("ma_einfuegen");
-* sout.println(name); sout.println(vorName); sout.println(nutzerName);
-* sout.println(passwort);
-* 
-* String antwort = "Fehler"; try { antwort = sin.readLine(); if
-* (antwort.equals("Erfolg")) {
-* 
-* // Eingelogte MA vom Server lesen ...
-* 
-* // TODO Auto-generated method stub
-* 
-* // ... und zurÃ¼ckgeben
-* 
-* if (ma.getNutzerName().equals(mitarbeiter.getNutzerName()) || ma.getMaId() ==
-* mitarbeiter.getMaId()) { throw new
-* MitarbeiterUsernameIstBenutztException(mitarbeiter, ""); }
-* 
-* } else { // Fehler: Exception (re-)konstruieren String message =
-* sin.readLine(); } } catch (IOException e) {
-* System.err.println(e.getMessage()); }
-*/
-}
+		Mitarbeiter mitarbeiter = null;
+		sout.println("maregestrieren");
+		sout.println(name);
+		sout.println(vorName);
+		sout.println(nutzerName);
+		sout.println(passwort);
 
-@Override
-public Mitarbeiter mitarbeiterEinloggen(String nutzerName, String passwort)
-throws NutzernameOderPasswortFalschException {
-
-sout.println("maeinloggen");
-sout.println(nutzerName);
-sout.println(passwort);
-
-String antwort = "Fehler";
-try {
-antwort = sin.readLine();
-if (antwort.equals("Erfolg")) {
-// Eingelogte MA vom Server lesen ...
-Mitarbeiter mitarbeiter = liesMitarbeiterVonServer();
-return mitarbeiter;
-} else {
-// Fehler: Exception (re-)konstruieren
-String message = sin.readLine();
-throw new NutzernameOderPasswortFalschException();
-}
-} catch (IOException e) {
-System.err.println(e.getMessage());
-return null;
-}
-}
-
-@Override
-public void regestiereNeueMitarbeiter(String name, String vorName, String nutzerName, String passwort)
-throws MitarbeiterUsernameIstBenutztException {
-
-Mitarbeiter mitarbeiter = null;
-sout.println("maregestrieren");
-sout.println(name);
-sout.println(vorName);
-sout.println(nutzerName);
-sout.println(passwort);
-
-String antwort = "Fehler";
-try {
-antwort = sin.readLine();
-if (antwort.equals("Erfolg")) { // Eingelogte MA vom Server lesen ...
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
 
 // TODO Auto-generated method stub
 
-} else { // Fehler: Exception (re-)konstruieren String message =
-sin.readLine();
+			} else { // Fehler: Exception (re-)konstruieren String message =
+				sin.readLine();
 
-throw new MitarbeiterUsernameIstBenutztException(mitarbeiter, "");
-}
-} catch (IOException e) {
-System.err.println(e.getMessage());
-}
+				throw new MitarbeiterUsernameIstBenutztException(null, "");
+			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
 
-}
+	}
 
-@Override
-public void loggeMitarbeiterAus(Mitarbeiter mitarbeiter) {
-sout.println("malogout");
-sout.println(mitarbeiter.getName());
-sout.println(mitarbeiter.getVorname());
-sout.println(mitarbeiter.getNutzerName());
-sout.println(mitarbeiter.getPasswort());
+	@Override
+	public void loggeMitarbeiterAus(Mitarbeiter mitarbeiter) {
+		sout.println("malogout");
+		sout.println(mitarbeiter.getName());
+		sout.println(mitarbeiter.getVorname());
+		sout.println(mitarbeiter.getNutzerName());
+		sout.println(mitarbeiter.getPasswort());
 
-String antwort = "Fehler";
-try {
-antwort = sin.readLine();
-if (antwort.equals("Erfolg")) { // Eingelogte MA vom Server lesen ...
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
 
-// TODO Auto-generated method stub
+			} else {
+				String message = sin.readLine();
+				System.out.println(message);
 
-} else { // Fehler: Exception (re-)konstruieren String message =
-sin.readLine();
+			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+		}
+	}
 
-}
-} catch (IOException e) {
-System.err.println(e.getMessage());
-}
-}
-
-@Override
-public List<Mitarbeiter> gibAlleMitarbeiter() {
-List<Mitarbeiter> mitarbeiter_list = new Vector<Mitarbeiter>();
-sout.println("gibAlleMitarbeiter");
-String antwort = "Fehler";
-try {
-antwort = sin.readLine();
-if (antwort.equals("Erfolg")) {
-antwort = sin.readLine();
-int anzahl = Integer.parseInt(antwort);
-for (int i = 0; i < anzahl; i++) {
-Mitarbeiter ma = liesMitarbeiterVonServer();
-mitarbeiter_list.add(ma);
-}
-return mitarbeiter_list;
-} else {
+	@Override
+	public List<Mitarbeiter> gibAlleMitarbeiter() {
+		List<Mitarbeiter> mitarbeiter_list = new Vector<Mitarbeiter>();
+		sout.println("gibAlleMitarbeiter");
+		String antwort = "Fehler";
+		try {
+			antwort = sin.readLine();
+			if (antwort.equals("Erfolg")) {
+				antwort = sin.readLine();
+				int anzahl = Integer.parseInt(antwort);
+				for (int i = 0; i < anzahl; i++) {
+					Mitarbeiter ma = liesMitarbeiterVonServer();
+					mitarbeiter_list.add(ma);
+				}
+				return mitarbeiter_list;
+			} else {
 // Fehler: Exception (re-)konstruieren
-String message = sin.readLine();
-System.out.println(message);
+				String message = sin.readLine();
+				System.out.println(message);
 
-}
-} catch (IOException e) {
-System.err.println(e.getMessage());
-return null;
-}
+			}
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			return null;
+		}
 
-return null;
-}
+		return null;
+	}
 
-@Override
-public void schreibeMitarbeiter() throws IOException {
-sout.println("mashreiben");
-}
+	@Override
+	public void schreibeMitarbeiter() {
+		sout.println("mashreiben");
+	}
 
-private Mitarbeiter liesMitarbeiterVonServer() throws IOException {
-String antwort;
-Mitarbeiter mitarbeiter = null;
+	private Mitarbeiter liesMitarbeiterVonServer() throws IOException {
+		String antwort;
+		Mitarbeiter mitarbeiter = null;
 
-antwort = sin.readLine();
-int id = Integer.parseInt(antwort);
-String Name = sin.readLine();
-String vorname = sin.readLine();
-String nutzerName = sin.readLine();
-String password = sin.readLine();
+		antwort = sin.readLine();
+		int id;
+		if (antwort != null) {
 
-mitarbeiter = new Mitarbeiter(id, Name, vorname, nutzerName, password);
-return mitarbeiter;
-}
+			id = Integer.parseInt(antwort);
+		} else {
+			id = 0;
+		}
+		String Name = sin.readLine();
+		String vorname = sin.readLine();
+		String nutzerName = sin.readLine();
+		String password = sin.readLine();
+
+		mitarbeiter = new Mitarbeiter(id, Name, vorname, nutzerName, password);
+		return mitarbeiter;
+	}
 
 /////////////////////Ende Mitarbeiter /////////////////////////////////
 
@@ -779,9 +793,17 @@ return mitarbeiter;
 	}
 
 	@Override
-	public List<Verlauf> gibVerlauflistaus() throws VerlaufLeerException {
+	public List<Bestellung> GibAlleMeineBestellungen(Kunde kunde) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public List<Verlauf> gibVerlauflistaus() throws VerlaufLeerException {
+		List<Verlauf> verlaufList = new Vector<Verlauf>();
+		sout.println("gibVerlaufListe");
+
+		return verlaufList;
 	}
 
 	@Override
@@ -795,7 +817,6 @@ return mitarbeiter;
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 	// TODO: Weitere Funktionen der Bibliotheksverwaltung, z.B. ausleihen,
 	// zurückgeben etc.
